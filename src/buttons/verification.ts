@@ -6,7 +6,7 @@ import { approve, deny } from '../util/approval';
 const gradeRoles = JSON.parse(process.env.GRADE_ROLES!);
 
 export default {
-	execute(interaction) {
+	async execute(interaction) {
 		const buttonMatch = checkButtonId(interaction.customId);
 		if (buttonMatch('approve:')) {
 			const [, userId, name, grade] = interaction.customId.split(':');
@@ -23,10 +23,11 @@ export default {
 				gradeRoles[
 					intGrade === 6 ? 'six' : intGrade === 7 ? 'seven' : 'eight'
 				];
-			(interaction.member as GuildMember).roles.add([
-				roleId,
-				process.env.MEMBER_ROLE!,
-			]);
+			(
+				await interaction.guild!.members.fetch(
+					await interaction.client.users.fetch(userId)
+				)
+			).roles.add([roleId, process.env.MEMBER_ROLE!]);
 		} else if (buttonMatch('deny:')) {
 			const [, userId, name, grade] = interaction.customId.split(':');
 			interaction.update(
